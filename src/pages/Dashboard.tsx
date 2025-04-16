@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { ArrowRightLeft, CreditCard, PiggyBank, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 const Dashboard = () => {
   const { currentUser } = useAuth();
@@ -48,12 +49,8 @@ const Dashboard = () => {
     }
   ];
   
-  // Sample recent transactions - in a real app, these would come from a database
-  const recentTransactions = [
-    { id: 1, type: "Deposit", amount: 5000, date: "2025-04-15" },
-    { id: 2, type: "Withdrawal", amount: -2000, date: "2025-04-14" },
-    { id: 3, type: "Transfer", amount: -1500, date: "2025-04-13" }
-  ];
+  // Empty recent transactions array
+  const recentTransactions = [];
 
   return (
     <div className="space-y-6">
@@ -99,17 +96,23 @@ const Dashboard = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {recentTransactions.map((transaction) => (
-              <div key={transaction.id} className="flex justify-between items-center p-3 border rounded-md">
-                <div>
-                  <p className="font-medium">{transaction.type}</p>
-                  <p className="text-sm text-muted-foreground">{transaction.date}</p>
+            {recentTransactions.length > 0 ? (
+              recentTransactions.map((transaction) => (
+                <div key={transaction.id} className="flex justify-between items-center p-3 border rounded-md">
+                  <div>
+                    <p className="font-medium">{transaction.type}</p>
+                    <p className="text-sm text-muted-foreground">{transaction.date}</p>
+                  </div>
+                  <p className={`font-semibold ${transaction.amount >= 0 ? "text-green-600" : "text-red-600"}`}>
+                    {formatCurrency(transaction.amount)}
+                  </p>
                 </div>
-                <p className={`font-semibold ${transaction.amount >= 0 ? "text-green-600" : "text-red-600"}`}>
-                  {formatCurrency(transaction.amount)}
-                </p>
+              ))
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground">No transactions found</p>
               </div>
-            ))}
+            )}
           </div>
         </CardContent>
       </Card>
