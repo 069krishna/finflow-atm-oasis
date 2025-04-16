@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,16 +7,8 @@ import { ArrowDown, ArrowUp, ArrowRightLeft } from "lucide-react";
 const Transactions = () => {
   const [filter, setFilter] = useState<string>("all");
   
-  // Sample transactions - in a real app, these would come from a database
-  const allTransactions = [
-    { id: 1, type: "deposit", description: "Salary Deposit", amount: 25000, date: "2025-04-15" },
-    { id: 2, type: "withdrawal", description: "ATM Withdrawal", amount: -5000, date: "2025-04-14" },
-    { id: 3, type: "transfer", description: "Transfer to Rahul", amount: -3000, date: "2025-04-13" },
-    { id: 4, type: "deposit", description: "Refund", amount: 1200, date: "2025-04-12" },
-    { id: 5, type: "withdrawal", description: "Cash Withdrawal", amount: -2000, date: "2025-04-10" },
-    { id: 6, type: "transfer", description: "Utility Bill Payment", amount: -1500, date: "2025-04-08" },
-    { id: 7, type: "deposit", description: "Interest Credit", amount: 800, date: "2025-04-05" },
-  ];
+  // Empty transactions array
+  const allTransactions: any[] = [];
   
   const filteredTransactions = filter === "all" 
     ? allTransactions 
