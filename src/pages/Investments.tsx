@@ -138,7 +138,7 @@ const Investments = () => {
     setTimeout(() => {
       const newBalance = (currentUser?.balance || 0) - amount;
       
-      // Update user balance
+      // Update user balance first, before any other operations
       updateUserBalance(newBalance);
       
       // Record the transaction

@@ -152,7 +152,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Update in users array in localStorage for persistence
     const users = loadUsers();
     const updatedUsers = users.map((u: any) => 
-      u.id === currentUser.id ? {...u, transactions: updatedTransactions} : u
+      u.id === currentUser.id ? {...u, transactions: updatedTransactions, balance: updatedUser.balance} : u
     );
     saveUsers(updatedUsers);
   };
@@ -172,6 +172,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         u.id === currentUser.id ? {...u, balance: newBalance} : u
       );
       saveUsers(updatedUsers);
+      
+      // Force the component to re-render by creating a new reference
+      setCurrentUser({...updatedUser});
     }
   };
   

@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -101,7 +102,7 @@ const Transfer = () => {
           break;
       }
       
-      // Update user balance
+      // Update user balance first
       updateUserBalance(newBalance);
       
       // Record the transaction

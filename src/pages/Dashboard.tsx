@@ -1,13 +1,21 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { ArrowRightLeft, CreditCard, PiggyBank, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 const Dashboard = () => {
   const { currentUser, getUserTransactions } = useAuth();
   const navigate = useNavigate();
+  const [balance, setBalance] = useState(0);
+  
+  // Update balance whenever currentUser changes
+  useEffect(() => {
+    if (currentUser) {
+      setBalance(currentUser.balance);
+    }
+  }, [currentUser]);
   
   // Format currency to Indian Rupees
   const formatCurrency = (amount: number) => {
@@ -99,7 +107,7 @@ const Dashboard = () => {
           <CardHeader className="pb-2">
             <CardDescription>Available Balance</CardDescription>
             <CardTitle className="text-3xl font-bold">
-              {formatCurrency(currentUser?.balance || 0)}
+              {formatCurrency(balance)}
             </CardTitle>
           </CardHeader>
         </Card>
