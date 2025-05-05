@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -135,8 +136,10 @@ const Investments = () => {
     
     // Simulate processing delay
     setTimeout(() => {
+      const newBalance = (currentUser?.balance || 0) - amount;
+      
       // Update user balance
-      updateUserBalance((currentUser?.balance || 0) - amount);
+      updateUserBalance(newBalance);
       
       // Record the transaction
       recordTransaction({
