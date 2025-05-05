@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,7 +9,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { ArrowDown, ArrowUp, ArrowRightLeft } from "lucide-react";
 
 const Transfer = () => {
-  const { currentUser, updateUserBalance } = useAuth();
+  const { currentUser, updateUserBalance, recordTransaction } = useAuth();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("deposit");
   const [amount, setAmount] = useState("");
@@ -78,24 +77,40 @@ const Transfer = () => {
     setTimeout(() => {
       let newBalance = currentUser?.balance || 0;
       let action = "";
+      let transactionType: "deposit" | "withdrawal" | "transfer";
+      let transactionDescription = "";
       
       switch (activeTab) {
         case "deposit":
           newBalance += numAmount;
           action = "deposited";
+          transactionType = "deposit";
+          transactionDescription = "Cash Deposit";
           break;
         case "withdraw":
           newBalance -= numAmount;
           action = "withdrawn";
+          transactionType = "withdrawal";
+          transactionDescription = "Cash Withdrawal";
           break;
         case "transfer":
           newBalance -= numAmount;
           action = "transferred";
+          transactionType = "transfer";
+          transactionDescription = "Money Transfer";
           break;
       }
       
       // Update user balance
       updateUserBalance(newBalance);
+      
+      // Record the transaction
+      recordTransaction({
+        type: transactionType,
+        amount: numAmount,
+        description: transactionDescription,
+        recipient: activeTab === "transfer" ? recipient : undefined
+      });
       
       toast({
         title: "Transaction successful",

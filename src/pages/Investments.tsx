@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -67,7 +66,7 @@ const mutualFunds = [
 ];
 
 const Investments = () => {
-  const { currentUser, updateUserBalance } = useAuth();
+  const { currentUser, updateUserBalance, recordTransaction } = useAuth();
   const { toast } = useToast();
   const [selectedFund, setSelectedFund] = useState<typeof mutualFunds[0] | null>(null);
   const [investmentAmount, setInvestmentAmount] = useState("");
@@ -139,6 +138,13 @@ const Investments = () => {
       // Update user balance
       updateUserBalance((currentUser?.balance || 0) - amount);
       
+      // Record the transaction
+      recordTransaction({
+        type: "withdrawal",
+        amount: amount,
+        description: `Investment in ${selectedFund.name}`
+      });
+      
       toast({
         title: "Investment successful",
         description: `You have invested ${formatCurrency(amount)} in ${selectedFund.name}`,
@@ -185,11 +191,11 @@ const Investments = () => {
         <CardContent>
           <div className="space-y-4">
             {mutualFunds.map((fund) => (
-              <Dialog open={dialogOpen && selectedFund?.id === fund.id} onOpenChange={(open) => {
+              <Dialog key={fund.id} open={dialogOpen && selectedFund?.id === fund.id} onOpenChange={(open) => {
                 setDialogOpen(open);
                 if (!open) setSelectedFund(null);
               }}>
-                <DialogTrigger asChild key={fund.id}>
+                <DialogTrigger asChild>
                   <div className="flex justify-between items-center p-4 border rounded-lg hover:bg-gray-50 cursor-pointer" onClick={() => setSelectedFund(fund)}>
                     <div>
                       <h3 className="font-medium">{fund.name}</h3>

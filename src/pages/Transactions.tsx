@@ -1,18 +1,37 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowDown, ArrowUp, ArrowRightLeft } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { 
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious
+} from "@/components/ui/pagination";
 
 const Transactions = () => {
+  const { getUserTransactions } = useAuth();
   const [filter, setFilter] = useState<string>("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
   
-  // Empty transactions array
-  const allTransactions: any[] = [];
+  // Get transactions from auth context
+  const allTransactions = getUserTransactions();
   
   const filteredTransactions = filter === "all" 
     ? allTransactions 
     : allTransactions.filter(t => t.type === filter);
+  
+  // Pagination
+  const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedTransactions = filteredTransactions
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .slice(startIndex, startIndex + itemsPerPage);
   
   // Format currency to Indian Rupees
   const formatCurrency = (amount: number) => {
@@ -20,6 +39,18 @@ const Transactions = () => {
       style: 'currency',
       currency: 'INR'
     }).format(amount);
+  };
+  
+  // Format date
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat('en-IN', { 
+      day: '2-digit',
+      month: 'short', 
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).format(date);
   };
   
   const getTransactionIcon = (type: string) => {
@@ -74,13 +105,13 @@ const Transactions = () => {
           <CardDescription>
             {filter === "all" 
               ? "All transactions" 
-              : `Showing only ${filter}`}
+              : `Showing only ${filter}s`}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {filteredTransactions.length > 0 ? (
-              filteredTransactions.map((transaction) => (
+            {paginatedTransactions.length > 0 ? (
+              paginatedTransactions.map((transaction) => (
                 <div 
                   key={transaction.id} 
                   className={`flex justify-between items-center p-4 border rounded-lg ${getTransactionClass(transaction.type)}`}
@@ -91,11 +122,16 @@ const Transactions = () => {
                     </div>
                     <div>
                       <p className="font-medium">{transaction.description}</p>
-                      <p className="text-sm text-muted-foreground">{transaction.date}</p>
+                      {transaction.recipient && (
+                        <p className="text-sm text-muted-foreground">To: {transaction.recipient}</p>
+                      )}
+                      <p className="text-sm text-muted-foreground">{formatDate(transaction.date)}</p>
                     </div>
                   </div>
-                  <p className={`font-semibold ${transaction.amount >= 0 ? "text-green-600" : "text-red-600"}`}>
-                    {formatCurrency(transaction.amount)}
+                  <p className={`font-semibold ${
+                    transaction.type === "deposit" ? "text-green-600" : "text-red-600"
+                  }`}>
+                    {transaction.type === "deposit" ? "+" : "-"}{formatCurrency(Math.abs(transaction.amount))}
                   </p>
                 </div>
               ))
@@ -105,6 +141,37 @@ const Transactions = () => {
               </div>
             )}
           </div>
+          
+          {totalPages > 1 && (
+            <div className="mt-6">
+              <Pagination>
+                <PaginationContent>
+                  {currentPage > 1 && (
+                    <PaginationItem>
+                      <PaginationPrevious onClick={() => setCurrentPage(p => p - 1)} />
+                    </PaginationItem>
+                  )}
+                  
+                  {[...Array(totalPages)].map((_, i) => (
+                    <PaginationItem key={i}>
+                      <PaginationLink 
+                        isActive={currentPage === i + 1}
+                        onClick={() => setCurrentPage(i + 1)}
+                      >
+                        {i + 1}
+                      </PaginationLink>
+                    </PaginationItem>
+                  ))}
+                  
+                  {currentPage < totalPages && (
+                    <PaginationItem>
+                      <PaginationNext onClick={() => setCurrentPage(p => p + 1)} />
+                    </PaginationItem>
+                  )}
+                </PaginationContent>
+              </Pagination>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
