@@ -4,10 +4,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { ArrowRightLeft, CreditCard, PiggyBank, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
 
 const Dashboard = () => {
-  const { currentUser } = useAuth();
+  const { currentUser, getUserTransactions } = useAuth();
   const navigate = useNavigate();
   
   // Format currency to Indian Rupees
@@ -49,8 +48,47 @@ const Dashboard = () => {
     }
   ];
   
-  // Empty recent transactions array
-  const recentTransactions = [];
+  // Get recent transactions (last 5)
+  const recentTransactions = getUserTransactions()
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .slice(0, 5);
+
+  // Format date
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat('en-IN', { 
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    }).format(date);
+  };
+
+  // Get transaction icon based on type
+  const getTransactionIcon = (type: string) => {
+    switch (type) {
+      case "deposit":
+        return <PiggyBank className="h-5 w-5 text-green-500" />;
+      case "withdrawal":
+        return <CreditCard className="h-5 w-5 text-red-500" />;
+      case "transfer":
+        return <ArrowRightLeft className="h-5 w-5 text-blue-500" />;
+      default:
+        return <ArrowRightLeft className="h-5 w-5" />;
+    }
+  };
+
+  const getTransactionClass = (type: string) => {
+    switch (type) {
+      case "deposit":
+        return "bg-green-50 border-green-100";
+      case "withdrawal":
+        return "bg-red-50 border-red-100";
+      case "transfer":
+        return "bg-blue-50 border-blue-100";
+      default:
+        return "bg-gray-50";
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -91,20 +129,38 @@ const Dashboard = () => {
       </div>
       
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Recent Transactions</CardTitle>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="text-sm"
+            onClick={() => navigate("/transactions")}
+          >
+            View All
+          </Button>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             {recentTransactions.length > 0 ? (
               recentTransactions.map((transaction) => (
-                <div key={transaction.id} className="flex justify-between items-center p-3 border rounded-md">
-                  <div>
-                    <p className="font-medium">{transaction.type}</p>
-                    <p className="text-sm text-muted-foreground">{transaction.date}</p>
+                <div 
+                  key={transaction.id} 
+                  className={`flex justify-between items-center p-3 border rounded-md ${getTransactionClass(transaction.type)}`}
+                >
+                  <div className="flex items-center space-x-3">
+                    <div className="bg-white p-2 rounded-full border">
+                      {getTransactionIcon(transaction.type)}
+                    </div>
+                    <div>
+                      <p className="font-medium">{transaction.description}</p>
+                      <p className="text-sm text-muted-foreground">{formatDate(transaction.date)}</p>
+                    </div>
                   </div>
-                  <p className={`font-semibold ${transaction.amount >= 0 ? "text-green-600" : "text-red-600"}`}>
-                    {formatCurrency(transaction.amount)}
+                  <p className={`font-semibold ${
+                    transaction.type === "deposit" ? "text-green-600" : "text-red-600"
+                  }`}>
+                    {transaction.type === "deposit" ? "+" : "-"}{formatCurrency(Math.abs(transaction.amount))}
                   </p>
                 </div>
               ))
